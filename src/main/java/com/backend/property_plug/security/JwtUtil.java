@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtUtil {
@@ -18,11 +21,14 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long jwtExpirationMs;
 
-    public String generateToken(String username) {
+    public String generateToken(String username, List<String> roles) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles);
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
