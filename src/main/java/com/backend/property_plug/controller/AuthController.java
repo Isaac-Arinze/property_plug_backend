@@ -17,6 +17,8 @@ import com.backend.property_plug.security.JwtUtil;
 import com.backend.property_plug.entity.User;
 import java.util.stream.Collectors;
 import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @RestController
 @RequestMapping("/auth")
