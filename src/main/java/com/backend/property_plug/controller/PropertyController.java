@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -55,10 +56,28 @@ public class PropertyController {
     @Operation(summary = "Create a new property (owner only)")
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<PropertyDto> createProperty(
+    public ResponseEntity<?> createProperty(
             @RequestPart("property") PropertyDto propertyDto,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Principal principal) {
+        if (images != null) {
+            for (MultipartFile file : images) {
+                String contentType = file.getContentType();
+                if (contentType == null ||
+                        !(contentType.equals(MediaType.IMAGE_JPEG_VALUE) ||
+                        contentType.equals(MediaType.IMAGE_PNG_VALUE) ||
+                        contentType.equals("image/jpg") ||
+                        contentType.equals("image/svg+xml") ||
+                        contentType.equals("image/gif") ||
+                        contentType.equals("image/webp") ||
+                        contentType.equals("image/bmp") ||
+                        contentType.equals("image/tiff") ||
+                        contentType.equals("image/x-icon") ||
+                        contentType.equals("image/vnd.microsoft.icon"))) {
+                    return ResponseEntity.badRequest().body("Unsupported file type: " + contentType);
+                }
+            }
+        }
         Long ownerId = userService.getUserByEmail(principal.getName()).getId();
         PropertyDto created = propertyService.createProperty(propertyDto, ownerId, images);
         return ResponseEntity.ok(created);
