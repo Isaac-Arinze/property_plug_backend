@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <p>Dear <span th:text="${name}">User</span>,</p>
+    <p>Please click the following link to verify your account:</p>
+    <p><a th:href="${verificationUrl}" th:text="${verificationUrl}"></a></p>
+    <p>This link will expire in 24 hours.</p>
+    <p>Best regards,<br/>Your Application Team</p>
+</body>
+</html>
