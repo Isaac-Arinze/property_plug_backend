@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import com.backend.property_plug.security.JwtUtil;
 import com.backend.property_plug.entity.User;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -100,7 +102,10 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
             User user = (User) authentication.getPrincipal();
-            String token = jwtUtil.generateToken(user.getEmail());
+            List<String> roles = user.getAuthorities().stream()
+                .map(auth -> auth.getAuthority())
+                .collect(Collectors.toList());
+            String token = jwtUtil.generateToken(user.getEmail(), roles);
             LoginResponseDto response = new LoginResponseDto(
                 token,
                 user.getEmail(),
