@@ -128,6 +128,14 @@ public class PropertyService {
         System.out.println("Tenant " + tenantEmail + " expressed interest in property " + propertyId);
     }
 
+    // New method: Get all properties with owner info for tenants
+    @PreAuthorize("hasAuthority('ROLE_PROPERTY_TENANT')")
+    public List<PropertyDto> getAllPropertiesWithOwnerInfo() {
+        return propertyRepository.findAll().stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
+    }
+
     private PropertyDto toDto(Property property) {
         PropertyDto dto = new PropertyDto();
         dto.setId(property.getId());
@@ -137,6 +145,9 @@ public class PropertyService {
         dto.setPrice(property.getPrice());
         dto.setOwnerId(property.getOwner() != null ? property.getOwner().getId() : null);
         dto.setOwnerName(property.getOwner() != null ? property.getOwner().getFullName() : null);
+        if (property.getOwner() != null) {
+            dto.setOwnerContactInfo(property.getOwner().getPublicContactInfo());
+        }
         if (property.getImages() != null) {
             dto.setImages(property.getImages().stream().map(this::toImageDto).collect(Collectors.toList()));
         }

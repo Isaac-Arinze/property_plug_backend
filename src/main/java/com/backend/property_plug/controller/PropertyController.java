@@ -62,6 +62,13 @@ public class PropertyController {
         return ResponseEntity.ok(propertyService.getPropertiesByOwner(ownerId));
     }
 
+    @Operation(summary = "Get all properties with owner info (tenant view)")
+    @PreAuthorize("hasAuthority('ROLE_PROPERTY_TENANT')")
+    @GetMapping("/tenant-view")
+    public ResponseEntity<List<PropertyDto>> getAllPropertiesForTenant() {
+        return ResponseEntity.ok(propertyService.getAllPropertiesWithOwnerInfo());
+    }
+
     // NEW: JSON-only endpoint for testing without images
     @Operation(summary = "Create a new property (JSON only - for testing)")
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")

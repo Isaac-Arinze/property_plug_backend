@@ -145,5 +145,10 @@ public class User implements UserDetails {
     public String getAuthority() {
         return userType != null ? userType.name() : null;
     }
+
+    // Public contact info for property owner
+    public String getPublicContactInfo() {
+        return String.format("Name: %s, Email: %s, Phone: %s", fullName, email, phoneNumber);
+    }
 }
 

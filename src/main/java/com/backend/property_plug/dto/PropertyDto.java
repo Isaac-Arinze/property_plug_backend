@@ -10,6 +10,7 @@ public class PropertyDto {
     private Double price;
     private Long ownerId;
     private String ownerName;
+    private String ownerContactInfo;
     private List<PropertyImageDto> images;
 
     // Getters and setters
@@ -27,6 +28,13 @@ public class PropertyDto {
     public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
     public String getOwnerName() { return ownerName; }
     public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public String getOwnerContactInfo() {
+        return ownerContactInfo;
+    }
+
+    public void setOwnerContactInfo(String ownerContactInfo) {
+        this.ownerContactInfo = ownerContactInfo;
+    }
     public List<PropertyImageDto> getImages() { return images; }
     public void setImages(List<PropertyImageDto> images) { this.images = images; }
 } 
