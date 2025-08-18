@@ -68,7 +68,8 @@ public class SecurityConfig {
         // Allow specific origins
         configuration.setAllowedOrigins(Arrays.asList(
             "https://property-plug.vercel.app",
-            "http://localhost:3000" // For development
+            "http://localhost:3000", // For development
+            "http://127.0.0.1:5500"
         ));
         
         // Allow specific HTTP methods
