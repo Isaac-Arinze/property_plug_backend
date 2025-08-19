@@ -15,20 +15,21 @@ public class WebConfig implements WebMvcConfigurer {
         return new StandardServletMultipartResolver();
     }
 
-    @Override
+
+     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                    "http://127.0.0.1:5500",
-                    "http://localhost:5500",
-                    "http://127.0.0.1:3000",
-                    "http://localhost:3000",
-                    "http://127.0.0.1:8080",
-                    "http://localhost:8080"
+                    "https://property-plug.vercel.app",
+                    "http://localhost:3000", // For development
+                    "http://127.0.0.1:5500"
+
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
-}
+
+
+
