@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collections;
+import java.util.UUID;
 
 @Service
 public class PropertyService {
@@ -50,19 +51,19 @@ public class PropertyService {
             .collect(Collectors.toList());
     }
 
-    public PropertyDto getPropertyById(Long id) {
+    public PropertyDto getPropertyById(UUID id) {
         Property property = propertyRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Property not found"));
         return toDto(property);
     }
 
-    public List<PropertyDto> getPropertiesByOwner(Long ownerId) {
+    public List<PropertyDto> getPropertiesByOwner(UUID ownerId) {
         return propertyRepository.findAll().stream()
             .filter(p -> p.getOwner() != null && p.getOwner().getId().equals(ownerId))
             .map(this::toDto)
             .collect(Collectors.toList());
     }
 
-    public PropertyDto createProperty(PropertyDto dto, Long ownerId, List<MultipartFile> images) {
+    public PropertyDto createProperty(PropertyDto dto, UUID ownerId, List<MultipartFile> images) {
         User owner = userRepository.findById(ownerId).orElseThrow(() -> new EntityNotFoundException("Owner not found"));
         Property property = new Property();
         property.setTitle(dto.getTitle());
@@ -87,11 +88,11 @@ public class PropertyService {
         return toDto(saved);
     }
 
-    public void deleteProperty(Long id) {
+    public void deleteProperty(UUID id) {
         propertyRepository.deleteById(id);
     }
 
-    public PropertyDto updateProperty(Long propertyId, PropertyDto dto, Long ownerId, List<MultipartFile> images) {
+    public PropertyDto updateProperty(UUID propertyId, PropertyDto dto, UUID ownerId, List<MultipartFile> images) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new EntityNotFoundException("Property not found"));
         if (property.getOwner() == null || !property.getOwner().getId().equals(ownerId)) {
@@ -120,7 +121,7 @@ public class PropertyService {
         return toDto(saved);
     }
 
-    public void expressInterest(Long propertyId, String tenantEmail) {
+    public void expressInterest(UUID propertyId, String tenantEmail) {
         // TODO: Implement actual Interest entity and persistence
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new EntityNotFoundException("Property not found"));

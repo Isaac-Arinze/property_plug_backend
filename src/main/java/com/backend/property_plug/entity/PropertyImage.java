@@ -1,12 +1,14 @@
 package com.backend.property_plug.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 
 @Entity
 public class PropertyImage {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
+    private UUID id;
 
     private String url;
 
@@ -15,8 +17,8 @@ public class PropertyImage {
     private Property property;
 
     // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }

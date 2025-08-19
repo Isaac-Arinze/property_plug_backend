@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/properties")
@@ -50,7 +51,7 @@ public class PropertyController {
 
     @Operation(summary = "Get property by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<PropertyDto> getPropertyById(@PathVariable Long id) {
+    public ResponseEntity<PropertyDto> getPropertyById(@PathVariable UUID id) {
         return ResponseEntity.ok(propertyService.getPropertyById(id));
     }
 
@@ -58,7 +59,7 @@ public class PropertyController {
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")
     @GetMapping("/my")
     public ResponseEntity<List<PropertyDto>> getMyProperties(Principal principal) {
-        Long ownerId = userService.getUserByEmail(principal.getName()).getId();
+        UUID ownerId = userService.getUserByEmail(principal.getName()).getId();
         return ResponseEntity.ok(propertyService.getPropertiesByOwner(ownerId));
     }
 
@@ -82,7 +83,7 @@ public class PropertyController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Property data is required"));
             }
 
-            Long ownerId = userService.getUserByEmail(principal.getName()).getId();
+            UUID ownerId = userService.getUserByEmail(principal.getName()).getId();
             PropertyDto created = propertyService.createProperty(propertyDto, ownerId, null);
             return ResponseEntity.ok(created);
         } catch (Exception e) {
@@ -137,7 +138,7 @@ public class PropertyController {
                 }
             }
 
-            Long ownerId = userService.getUserByEmail(principal.getName()).getId();
+            UUID ownerId = userService.getUserByEmail(principal.getName()).getId();
             PropertyDto created = propertyService.createProperty(propertyDto, ownerId, images);
             return ResponseEntity.ok(created);
             
@@ -182,7 +183,7 @@ public class PropertyController {
                 }
             }
 
-            Long ownerId = userService.getUserByEmail(principal.getName()).getId();
+            UUID ownerId = userService.getUserByEmail(principal.getName()).getId();
             PropertyDto created = propertyService.createProperty(propertyDto, ownerId, images);
             return ResponseEntity.ok(created);
             
@@ -196,7 +197,7 @@ public class PropertyController {
     @Operation(summary = "Delete a property (owner only)")
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProperty(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProperty(@PathVariable UUID id) {
         propertyService.deleteProperty(id);
         return ResponseEntity.noContent().build();
     }
@@ -205,23 +206,15 @@ public class PropertyController {
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProperty(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestPart("property") String propertyJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Principal principal) {
         try {
-            // Parse JSON string to PropertyDto
-            PropertyDto propertyDto;
-            try {
-                propertyDto = objectMapper.readValue(propertyJson, PropertyDto.class);
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid JSON format: " + e.getMessage()));
-            }
-
-            Long ownerId = userService.getUserByEmail(principal.getName()).getId();
+            PropertyDto propertyDto = objectMapper.readValue(propertyJson, PropertyDto.class);
+            UUID ownerId = userService.getUserByEmail(principal.getName()).getId();
             PropertyDto updated = propertyService.updateProperty(id, propertyDto, ownerId, images);
             return ResponseEntity.ok(updated);
-            
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to update property: " + e.getMessage()));
@@ -231,8 +224,9 @@ public class PropertyController {
     @Operation(summary = "Express interest in a property (tenant only)")
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_TENANT')")
     @PostMapping("/{id}/interest")
-    public ResponseEntity<String> expressInterest(@PathVariable Long id, Principal principal) {
-        propertyService.expressInterest(id, principal.getName());
+    public ResponseEntity<String> expressInterest(@PathVariable UUID id, Principal principal) {
+        String tenantEmail = principal.getName();
+        propertyService.expressInterest(id, tenantEmail);
         return ResponseEntity.ok("Interest expressed successfully");
     }
 
