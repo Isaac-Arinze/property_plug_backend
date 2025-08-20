@@ -25,7 +25,7 @@ public class EmailService {
                 baseUrl + "/auth/verify?token=" + user.getVerificationToken() + "\n\n" +
                 "This link will expire in 24 hours.\n\n" +
                 "Best regards,\n" +
-                "Your Application Team");
+                "Property Plug Solutions");
 
         mailSender.send(message);
     }
@@ -40,7 +40,7 @@ public class EmailService {
                 "This link will expire in 1 hour.\n\n" +
                 "If you did not request this, please ignore this email.\n\n" +
                 "Best regards,\n" +
-                "Your Application Team");
+                "Property Plug Solutions");
 
         mailSender.send(message);
     }
