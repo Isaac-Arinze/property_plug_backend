@@ -20,7 +20,7 @@ RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 
 # Expose the port your app runs on (change if not 8080)
-EXPOSE 8091
+EXPOSE 8090 
 
 # Run the jar file
 CMD ["java", "-jar", "target/property-plug-0.0.1-SNAPSHOT.jar"] 
