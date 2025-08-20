@@ -6,7 +6,7 @@ import java.util.UUID;
 @Entity
 public class PropertyImage {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
