@@ -3,6 +3,7 @@ package com.backend.property_plug.controller;
 import com.backend.property_plug.Services.PropertyService;
 import com.backend.property_plug.Services.UserService;
 import com.backend.property_plug.dto.PropertyDto;
+import com.backend.property_plug.dto.PropertyListingDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +37,20 @@ public class PropertyController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Operation(summary = "Get all properties with pagination and filtering")
+    @Operation(summary = "Get all properties with pagination and filtering (listing format)")
+    @GetMapping("/listing")
+    public ResponseEntity<List<PropertyListingDto>> getAllPropertiesForListing(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String title
+    ) {
+        return ResponseEntity.ok(propertyService.getAllPropertiesForListing(page, size, location, minPrice, maxPrice, title));
+    }
+
+    @Operation(summary = "Get all properties with pagination and filtering (full format)")
     @GetMapping
     public ResponseEntity<List<PropertyDto>> getAllProperties(
             @RequestParam(defaultValue = "0") int page,
@@ -55,7 +69,21 @@ public class PropertyController {
         return ResponseEntity.ok(propertyService.getPropertyById(id));
     }
 
-    @Operation(summary = "Get properties for the authenticated owner")
+    @Operation(summary = "Get property by ID (listing format)")
+    @GetMapping("/{id}/listing")
+    public ResponseEntity<PropertyListingDto> getPropertyByIdForListing(@PathVariable UUID id) {
+        return ResponseEntity.ok(propertyService.getPropertyByIdForListing(id));
+    }
+
+    @Operation(summary = "Get properties for the authenticated owner (listing format)")
+    @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")
+    @GetMapping("/my/listing")
+    public ResponseEntity<List<PropertyListingDto>> getMyPropertiesForListing(Principal principal) {
+        UUID ownerId = userService.getUserByEmail(principal.getName()).getId();
+        return ResponseEntity.ok(propertyService.getPropertiesByOwnerForListing(ownerId));
+    }
+
+    @Operation(summary = "Get properties for the authenticated owner (full format)")
     @PreAuthorize("hasAuthority('ROLE_PROPERTY_OWNER')")
     @GetMapping("/my")
     public ResponseEntity<List<PropertyDto>> getMyProperties(Principal principal) {
@@ -68,6 +96,13 @@ public class PropertyController {
     @GetMapping("/tenant-view")
     public ResponseEntity<List<PropertyDto>> getAllPropertiesForTenant() {
         return ResponseEntity.ok(propertyService.getAllPropertiesWithOwnerInfo());
+    }
+
+    @Operation(summary = "Get all properties with owner info (tenant view - listing format)")
+    @PreAuthorize("hasAuthority('ROLE_PROPERTY_TENANT')")
+    @GetMapping("/tenant-view/listing")
+    public ResponseEntity<List<PropertyListingDto>> getAllPropertiesForTenantListing() {
+        return ResponseEntity.ok(propertyService.getAllPropertiesWithOwnerInfoForListing());
     }
 
     // NEW: JSON-only endpoint for testing without images
@@ -158,16 +193,37 @@ public class PropertyController {
             @RequestParam("description") String description,
             @RequestParam("location") String location,
             @RequestParam("price") Double price,
+            @RequestParam("type") String type,
+            @RequestParam(value = "rating", required = false) Double rating,
+            @RequestParam(value = "reviewsCount", required = false) Integer reviewsCount,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Principal principal
     ) {
         try {
+            // Validate type field
+            if (type == null || (!type.equals("Sale") && !type.equals("Rent"))) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Type must be either 'Sale' or 'Rent'"));
+            }
+
+            // Validate rating if provided
+            if (rating != null && (rating < 0 || rating > 5)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Rating must be between 0 and 5"));
+            }
+
+            // Validate reviewsCount if provided
+            if (reviewsCount != null && reviewsCount < 0) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Reviews count cannot be negative"));
+            }
+
             // Create PropertyDto from individual fields
             PropertyDto propertyDto = new PropertyDto();
             propertyDto.setTitle(title);
             propertyDto.setDescription(description);
             propertyDto.setLocation(location);
             propertyDto.setPrice(price);
+            propertyDto.setType(type);
+            propertyDto.setRating(rating != null ? rating : 0.0);
+            propertyDto.setReviewsCount(reviewsCount != null ? reviewsCount : 0);
 
             // Validate images if provided
             if (images != null && !images.isEmpty()) {
