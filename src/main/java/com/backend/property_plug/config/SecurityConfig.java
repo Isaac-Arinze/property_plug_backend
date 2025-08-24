@@ -75,7 +75,8 @@ public class SecurityConfig {
                     "/auth/register", "/auth/login", "/auth/verify", 
                     "/auth/forgot-password", "/auth/reset-password", 
                     "/css/**", "/js/**", "/images/**",
-                    "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+                    "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                    "/properties/listing", "/properties", "/properties/*/listing"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
